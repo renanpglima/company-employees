@@ -2,13 +2,16 @@ package com.callcenter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientTeam {
+public class ClientTeam implements Comparable<ClientTeam>{
 	
 	private List<Employee> employees;
 	private int minMaturity;
 	private String name;
 	
-	public ClientTeam(String name, int maturity) {
+	private int extraMaturity;
+	private int currentMaturity;
+	
+	public ClientTeam(String name, int maturity){
 		this.employees = new ArrayList<Employee>();
 		this.minMaturity = maturity;
 		this.name = name;
@@ -20,6 +23,12 @@ public class ClientTeam {
 	
 	public void addEmployee(Employee e) {
 		this.employees.add(e);
+		this.updateCurrentMaturity();
+	}
+	
+	public void setEmployees(ArrayList<Employee> employees) {
+		this.employees = employees;
+		this.updateCurrentMaturity();
 	}
 	
 	public int getMinMaturity() {
@@ -35,22 +44,35 @@ public class ClientTeam {
 		this.name = name;
 	}
 	
-	public int getCurrentTeamMaturity() {
+	public void updateCurrentMaturity() {
 		int ret = 0;
 		for (Employee e : this.employees) {
 			ret += e.getpLevel();
 		}
-		return ret;
+		this.currentMaturity = ret;
+	}
+	
+	public int getCurrentMaturity() {
+		return this.currentMaturity;
+	}
+
+	public int getExtraMaturity() {
+		return this.getCurrentMaturity() - this.getMinMaturity();
 	}
 	
 	public String toString() {
 		String ret = this.name + " - Min. Maturity " + this.minMaturity + 
-				" - Current Maturity " + this.getCurrentTeamMaturity() + "\n";
+				" - Current Maturity " + this.getCurrentMaturity() + "\n";
 		
 		for (Employee e : this.employees) {
 			ret += e.toString() + "\n";
 		}
 		
 		return ret;
+	}
+
+	@Override
+	public int compareTo(ClientTeam o) {
+		return o.getMinMaturity() - this.getMinMaturity() ;
 	}
 }

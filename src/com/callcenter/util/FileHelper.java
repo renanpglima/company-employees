@@ -47,16 +47,14 @@ public class FileHelper {
 		return team;
 	}
 
-	public static void loadEmployees(ArrayList<ClientTeam> clientTeams, String csvFile) 
+	public static ArrayList<Employee> loadEmployees(String csvFile) 
 			throws FileFormatException, FileNotFoundException, IOException {
+		
+		ArrayList<Employee> employees = new ArrayList<Employee>();
 		
 		BufferedReader br = new BufferedReader(new FileReader(csvFile));
 		br.readLine(); //jumping first line
 		String line = "";
-		
-		int index = 0;
-		ClientTeam team = clientTeams.get(index);
-		index++;
 		
 		while ((line = br.readLine()) != null) {
             String[] parts = line.split(",");
@@ -74,20 +72,18 @@ public class FileHelper {
 	            int lastProgYear 	= Integer.parseInt(parts[4]);
 	            
 	            Employee emp = new Employee(name, pLevel, birthYear, admissionYear, lastProgYear);
-	            
-	            if (team.getCurrentTeamMaturity() >= team.getMinMaturity() && index < clientTeams.size()) {
-	            	team = clientTeams.get(index);
-	            	index++;
-	            }
-	            
-	            team.addEmployee(emp);
-	            
+	            employees.add(emp);
+	       
 	            
             }catch (NumberFormatException e) {
+            	br.close();
             	throw new FileFormatException();
             }
 		}
 		
+		br.close();
+		
+		return employees;
 		
 	}
 }
