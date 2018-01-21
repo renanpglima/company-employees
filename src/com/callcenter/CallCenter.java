@@ -15,6 +15,18 @@ import com.callcenter.util.FileHelper;
 public class CallCenter {
 
 	private ArrayList<ClientTeam> clientTeams;
+	public ArrayList<ClientTeam> getClientTeams() {
+		return clientTeams;
+	}
+
+	public ArrayList<Employee> getEmployees() {
+		return employees;
+	}
+
+	public int getCurrenYear() {
+		return currenYear;
+	}
+
 	private ArrayList<Employee> employees;
 
 	private int currenYear;
