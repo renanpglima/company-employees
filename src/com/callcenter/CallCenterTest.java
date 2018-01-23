@@ -9,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.callcenter.exceptions.FileFormatException;
+import com.callcenter.exceptions.TeamAlocationException;
 
 class CallCenterTest {	
 
@@ -24,7 +25,7 @@ class CallCenterTest {
 
 	@DisplayName("Test Allocation and teams maturity")
 	@Test
-	void testAllocate() throws FileNotFoundException, FileFormatException, IOException {
+	void testAllocate() throws FileNotFoundException, FileFormatException, IOException, TeamAlocationException {
 		CallCenter cc = new CallCenter();
 		cc.load("docs/teams.txt", "docs/employees.txt");
 		cc.allocate();
@@ -36,7 +37,7 @@ class CallCenterTest {
 
 	@DisplayName("Test promotion and year progress")
 	@Test
-	void testPromote() throws FileNotFoundException, FileFormatException, IOException {
+	void testPromote() throws FileNotFoundException, FileFormatException, IOException, TeamAlocationException {
 		CallCenter cc = new CallCenter();
 		cc.load("docs/teams.txt", "docs/employees.txt");
 		cc.allocate();
@@ -47,8 +48,9 @@ class CallCenterTest {
 		assertEquals(yearBefore + 2, cc.getCurrenYear());
 	}
 
+	@DisplayName("Check if all employees have team after ballance")
 	@Test
-	void testBalance() throws FileNotFoundException, FileFormatException, IOException {
+	void testBalance() throws FileNotFoundException, FileFormatException, IOException, TeamAlocationException {
 		CallCenter cc = new CallCenter();
 		cc.load("docs/teams.txt", "docs/employees.txt");
 		cc.allocate();
@@ -57,11 +59,21 @@ class CallCenterTest {
 		cc.promote(4);
 		cc.balance();
 		
-		int matRef = cc.getClientTeams().get(0).getExtraMaturity();
-		
-		for(int i = 1; i < cc.getClientTeams().size(); i++) {
-			int mat = cc.getClientTeams().get(i).getExtraMaturity();
-			assertEquals(Math.abs(matRef - mat) <= 1 , true);
+		for (Employee e : cc.getEmployees()) {
+			boolean found = false;
+			
+			for (ClientTeam ct : cc.getClientTeams()) {
+				for (Employee e2 : ct.getEmployees()) {
+					if (e2 == e) {
+						found = true;
+						break;
+					}
+				}
+				if (found)
+					break;
+			}
+			
+			assertEquals(found, true);
 		}
 	}
 

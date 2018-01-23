@@ -1,0 +1,14 @@
+Como Executar:
+
+* Gerar arquivo .jar com a classe CallCenter como principal do projeto
+* executar o arquivo java -jar CallCenter.jar gerado
+* Seguir instruções do programa:
+
+*****************************************
+****WELLCOME TO THE CALLCENTER SYSTEM****
+*****************************************
+Check how to use the commands:
+*** LOAD        ->      load team_file_name.txt employees_file_name.txt
+*** ALLOCATE    ->      allocate
+*** PROMOTE     ->      promote quantity(int)
+*** BALANCE     ->      balance

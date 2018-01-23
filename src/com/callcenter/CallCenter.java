@@ -1,15 +1,14 @@
 package com.callcenter;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 
 import com.callcenter.exceptions.FileFormatException;
+import com.callcenter.exceptions.TeamAlocationException;
 import com.callcenter.util.FileHelper;
 
 public class CallCenter {
@@ -42,8 +41,18 @@ public class CallCenter {
 		return "loaded";
 	}
 
-	public String allocate() {
+	public String allocate() throws TeamAlocationException{
+		
+		if (this.clientTeams == null || this.employees == null || 
+				this.clientTeams.size() == 0 ||
+				this.employees.size() == 0) {
+			throw new TeamAlocationException();
+		}
 
+		for (ClientTeam ct : this.clientTeams) {
+			ct.setEmployees(new ArrayList<Employee>());
+		}
+		
 		int index = 0;
 		ClientTeam team = this.clientTeams.get(index);
 		index++;
@@ -62,7 +71,13 @@ public class CallCenter {
 		return this.toString();
 	}
 
-	public String promote(int promote) {
+	public String promote(int promote) throws TeamAlocationException {
+		
+		if (this.clientTeams == null || this.employees == null || 
+				this.clientTeams.size() == 0 ||
+				this.employees.size() == 0) {
+			throw new TeamAlocationException();
+		}
 		
 		Employee[] promotedEmployees = new Employee[promote];
 		
@@ -114,14 +129,13 @@ public class CallCenter {
 		
 	}
 
-	public String balance() {
+	public String balance() throws TeamAlocationException {
 		
-		int extraSum = 0;
-		for (ClientTeam ct : this.clientTeams) {
-			extraSum += ct.getExtraMaturity();
+		if (this.clientTeams == null || this.employees == null || 
+				this.clientTeams.size() == 0 ||
+				this.employees.size() == 0) {
+			throw new TeamAlocationException();
 		}
-		
-		int target = extraSum/this.clientTeams.size();
 		
 		Employee[] employeesArray = new Employee[this.employees.size()];
 		employeesArray = this.employees.toArray(employeesArray);
@@ -131,105 +145,56 @@ public class CallCenter {
 		teamArray = this.clientTeams.toArray(teamArray);
 		Arrays.sort(teamArray);
 		
-		//clear teams
+		
+		int pSum = 0;
+		for (Employee e : this.employees) {
+			pSum += e.getpLevel();
+		}
+		
+		int minSum = 0;
 		for (ClientTeam ct : this.clientTeams) {
+			minSum += ct.getMinMaturity();
 			ct.setEmployees(new ArrayList<Employee>());
 			ct.updateCurrentMaturity();
 		}
 		
-		int tIndex = 0;
-		ClientTeam team = teamArray[tIndex++];
+		int target = (pSum - minSum)/this.clientTeams.size();
+		
+		ArrayList<Employee> notAllocated = new ArrayList<Employee>();
 		
 		for (int i = 0 ; i <employeesArray.length; i++) {
 			Employee e = employeesArray[i];
-
-			if ((tIndex < teamArray.length)  &&
-					((team.getCurrentMaturity() + e.getpLevel()) > (team.getMinMaturity() + target))) {
-				team = teamArray[tIndex++];
+			boolean added = false;
+			for (int j = 0 ; j < teamArray.length; j++) {
+				int newMaturity = teamArray[j].getCurrentMaturity() + e.getpLevel();
+				int maxMaturity = teamArray[j].getMinMaturity() + target;
+				if (newMaturity <= maxMaturity) {
+					teamArray[j].addEmployee(e);
+					added = true;
+					break;
+				}
 			}
 			
-			team.addEmployee(e);
+			if (!added) {
+				notAllocated.add(e);
+			}
+		}
+		
+		
+		for (Employee e : notAllocated) {
+			
+			ClientTeam t = teamArray[0];
+			
+			for (int i = 1; i < teamArray.length; i++) {
+				if (t.getExtraMaturity() > teamArray[i].getExtraMaturity()) {
+					t = teamArray[i];
+				}
+			}
+			t.addEmployee(e);
 		}
 		
 		
 		return this.toString();
-	}
-
-	private void balance(ClientTeam[] pair, int diff) {
-		int p0Extra = pair[0].getExtraMaturity();
-		int p1Extra = pair[1].getExtraMaturity();
-		
-		int p0Target = pair[0].getMinMaturity() + (p0Extra - (diff/2));
-		int p1Target = pair[1].getMinMaturity() + (p1Extra + (diff/2));
-		
-		int size = pair[0].getEmployees().size() + pair[1].getEmployees().size();
-		
-		Employee[] employees = new Employee[size];
-		int index = 0;
-		for (Employee e : pair[0].getEmployees()) {
-			employees[index++] = e;
-		}
-		for (Employee e : pair[1].getEmployees()) {
-			employees[index++] = e;
-		}
-		
-		Arrays.sort(employees);
-		
-		ArrayList<Employee> p0Emp = new ArrayList<Employee>();
-		ArrayList<Employee> p1Emp = new ArrayList<Employee>();
-		
-		for (int i = 0; i < employees.length; i++) {
-			Employee e = employees[i];
-			
-			if (i%2 == 0) {
-				if (p0Target > 0) {
-					p0Emp.add(e);
-					p0Target -= e.getpLevel();
-				}else {
-					p1Emp.add(e);
-					p1Target -= e.getpLevel();
-				}
-				
-			}else {
-				if (p1Target > 0) {
-					p1Emp.add(e);
-					p1Target -= e.getpLevel();
-				}else {
-					p0Emp.add(e);
-					p0Target -= e.getpLevel();
-				}
-			}
-		}
-		
-		pair[0].setEmployees(p0Emp);
-		pair[1].setEmployees(p1Emp);
-	}
-
-	private ClientTeam[] getMaxDiffExtraMaturity() {
-		ClientTeam[] pair = new ClientTeam[2];
-		pair[0] = this.clientTeams.get(0);
-		pair[1] = this.clientTeams.get(1);
-		
-		//ordering
-		if (pair[0].getExtraMaturity() < pair[1].getExtraMaturity()) {
-			ClientTeam t = pair[0];
-			pair[0] = pair[1];
-			pair[1] = t;
-		}
-		
-		for (int i = 2; i < this.clientTeams.size(); i++) {
-			
-			ClientTeam ct = this.clientTeams.get(i);
-			int ctMat = ct.getExtraMaturity();
-			
-			if (ctMat > pair[0].getExtraMaturity()) {
-				pair[0] = ct;
-			}else if (ctMat < pair[1].getExtraMaturity()) {
-				pair[1] = ct;
-			}
-		}
-		
-		return pair;
 	}
 
 	public String toString() {
@@ -263,16 +228,6 @@ public class CallCenter {
 		String cmd;
 		String input;
 		String [] args;
-		
-		//test
-		try {
-			this.load("docs/teams.txt", "docs/employees.txt");
-			this.allocate();
-			this.promote(2);
-			this.balance();
-		}catch(Exception e) {
-			
-		}
 
 		while (true) {
 			try {
@@ -324,6 +279,8 @@ public class CallCenter {
 				output = "ERROR: The file was not found\n" + output; 
 			} catch (IOException e) {
 				output = "ERROR: We have some problem reading the input\n" + output; 
+			} catch (TeamAlocationException e1) {
+				output = "ERROR: You need to load files before call allocate\n" + output; 
 			}
 
 			System.out.println(output);

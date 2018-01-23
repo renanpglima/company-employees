@@ -8,7 +8,6 @@ public class ClientTeam implements Comparable<ClientTeam>{
 	private int minMaturity;
 	private String name;
 	
-	private int extraMaturity;
 	private int currentMaturity;
 	
 	public ClientTeam(String name, int maturity){
@@ -62,7 +61,7 @@ public class ClientTeam implements Comparable<ClientTeam>{
 	
 	public String toString() {
 		String ret = this.name + " - Min. Maturity " + this.minMaturity + 
-				" - Current Maturity " + this.getCurrentMaturity() + "\n";
+				" - Current Maturity " + this.getCurrentMaturity() +"\n";
 		
 		for (Employee e : this.employees) {
 			ret += e.toString() + "\n";
@@ -73,6 +72,6 @@ public class ClientTeam implements Comparable<ClientTeam>{
 
 	@Override
 	public int compareTo(ClientTeam o) {
-		return o.getMinMaturity() - this.getMinMaturity() ;
+		return this.getMinMaturity() - o.getMinMaturity() ;
 	}
 }

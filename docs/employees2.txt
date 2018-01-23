@@ -1,0 +1,15 @@
+Employee Name,PLevel,Birth Year,Admission Year,Last Progression Year
+Diego,3,1991,2011,2015
+Lucas,4,1990,2012,2017
+Luciano,1,1979,2011,2013
+Luiz,1,1980,2005,2014
+Daniel,2,1989,2013,2015
+Jose Carlos,2,1994,2013,2016
+Felipe,3,1976,2018,2018
+Diego2,3,1991,2011,2015
+Lucas2,4,1990,2012,2017
+Luciano2,1,1979,2011,2013
+Luiz2,1,1980,2005,2014
+Daniel2,4,1989,2013,2015
+Jose2,2,1994,2013,2016
+Felipe2,5,1976,2018,2018

@@ -1,6 +1,6 @@
 package com.callcenter.exceptions;
 
-public class FileFormatException extends Exception {
+public class TeamAlocationException extends Exception {
 
 	/**
 	 * 
